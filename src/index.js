@@ -2,7 +2,7 @@ import bot from "./bot";
 import env from "node-env-file";
 import winston from "winston";
 
-env("./../.env");
+env(".env");
 
 const logger = new (winston.Logger)({
     transports: [
@@ -24,9 +24,8 @@ const botConfig = {
 
 try {
     const plBot = new bot(botConfig);
-
-
     plBot.updateSidebar();
 } catch ( error ){
+    console.log(error);
     logger.log(error);
 }

@@ -57,7 +57,7 @@ export default class bot {
         this.__initRedditClient();
         this.__initApiClient();
         this.__initTemplateEngine();
-    }
+     }
 
     __initRedditClient() {
         this.redditClient = new Snoowrap({
@@ -71,7 +71,7 @@ export default class bot {
     __initApiClient() {
         let clientArgs = {
             baseURL: 'https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/',
-            timeout: 1000,
+            timeout: 10000,
             headers: {
                 "X-Mashape-Key": this.apiKey,
                 "Accept": "application/json",
@@ -82,7 +82,7 @@ export default class bot {
     }
 
     __initTemplateEngine() {
-        this.templateEngine = Dot.process({ log: false, path: "./../views"});
+        this.templateEngine = Dot.process({ templateSettings: { strip: false }, path: 'views/'});
     }
 
     getStandings() {
@@ -94,7 +94,7 @@ export default class bot {
                     resolve(standings.data.data.standings);
                 },
                 (error) => {
-                    reject(new Error("Problem getting standings", error.id));
+                    reject(error);
                 }
             );
         });
@@ -102,14 +102,16 @@ export default class bot {
 
     updateSidebar() {
         let subreddit = this.subreddit;
-        let templateEngine = this.templateEngine;
 
         this.getStandings().then(
             ( standingsData ) => {
                 standingsData = take(standingsData, 10);
+                console.log(this.templateEngine);
+                let desc = this.templateEngine.sidebar(standingsData);
+                console.log(desc);
                 this.redditClient.getSubreddit(subreddit).editSettings(
                     {
-                        'description': templateEngine.sidebar(standingsData)
+                        'description': desc
                     }
                 ).then(
                     (response) => {
@@ -118,12 +120,12 @@ export default class bot {
                     }
                 ).catch(
                     ( error ) => {
-                        throw new Error(error);
+                        console.log(error);
                     }
                 );
             }).catch(
                 ( error ) => {
-                    throw new Error(error);
+                    console.log(error);
                 }
         );
     }

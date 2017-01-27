@@ -95,7 +95,7 @@ class bot {
     __initApiClient() {
         var clientArgs = {
             baseURL: 'https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/',
-            timeout: 1000,
+            timeout: 10000,
             headers: {
                 "X-Mashape-Key": this.apiKey,
                 "Accept": "application/json",
@@ -106,7 +106,7 @@ class bot {
     }
 
     __initTemplateEngine() {
-        this.templateEngine = _dot2.default.process({ log: false, path: "./../views" });
+        this.templateEngine = _dot2.default.process({ templateSettings: { strip: false }, path: 'views/' });
     }
 
     getStandings() {
@@ -118,7 +118,7 @@ class bot {
             _this.apiClient.get(standingsURI).then(function (standings) {
                 resolve(standings.data.data.standings);
             }, function (error) {
-                reject(new Error("Problem getting standings", error.id));
+                reject(error);
             });
         });
     }
@@ -127,24 +127,31 @@ class bot {
         var _this2 = this;
 
         var subreddit = this.subreddit;
-        var templateEngine = this.templateEngine;
 
         this.getStandings().then(function (standingsData) {
             standingsData = (0, _take3.default)(standingsData, 10);
+            console.log(_this2.templateEngine);
+            var desc = _this2.templateEngine.sidebar(standingsData);
+            console.log(desc);
             _this2.redditClient.getSubreddit(subreddit).editSettings({
-                'description': templateEngine.sidebar(standingsData)
+                'description': desc
             }).then(function (response) {
                 console.log(response);
                 console.log("done");
             }).catch(function (error) {
-                throw new Error(error);
+                console.log(error);
             });
         }).catch(function (error) {
-            throw new Error(error);
+            console.log(error);
         });
     }
 }
 exports.default = bot;
+//# sourceMappingURL=bot.js.map
+//# sourceMappingURL=bot.js.map
+//# sourceMappingURL=bot.js.map
+//# sourceMappingURL=bot.js.map
+//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map

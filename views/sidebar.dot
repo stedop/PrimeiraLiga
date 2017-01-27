@@ -1,0 +1,4 @@
+Team | Points
+---|---
+{{ for (var pos in it) { }}{{=it[pos].team }} | {{=it[pos].overall.points }}
+{{ } }}
