@@ -20,6 +20,10 @@ var _snoowrap = require('snoowrap');
 
 var _snoowrap2 = _interopRequireDefault(_snoowrap);
 
+var _dot = require('dot');
+
+var _dot2 = _interopRequireDefault(_dot);
+
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
 }
@@ -102,7 +106,7 @@ class bot {
     }
 
     __initTemplateEngine() {
-        this.templateEngine = require("dot").process({ path: "./../views" });
+        this.templateEngine = _dot2.default.process({ log: false, path: "./../views" });
     }
 
     getStandings() {
@@ -133,7 +137,7 @@ class bot {
                 console.log(response);
                 console.log("done");
             }).catch(function (error) {
-                console.log(error);
+                throw new Error(error);
             });
         }).catch(function (error) {
             throw new Error(error);
@@ -141,5 +145,6 @@ class bot {
     }
 }
 exports.default = bot;
+//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map

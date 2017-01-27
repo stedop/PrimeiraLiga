@@ -1,7 +1,15 @@
 import bot from "./bot";
 import env from "node-env-file";
+import winston from "winston";
 
 env("./../.env");
+
+const logger = new (winston.Logger)({
+    transports: [
+        new (winston.transports.Console)(),
+        new (winston.transports.File)({ filename: process.env.logFile })
+    ]
+});
 
 const botConfig = {
     'userAgent': process.env.userAgent,
@@ -14,7 +22,11 @@ const botConfig = {
     'leagueYear': process.env.leagueYear
 };
 
-const plBot = new bot(botConfig);
+try {
+    const plBot = new bot(botConfig);
 
 
-plBot.updateSidebar();
+    plBot.updateSidebar();
+} catch ( error ){
+    logger.log(error);
+}

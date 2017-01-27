@@ -3,6 +3,7 @@
 import {defaults, take} from 'lodash';
 import Axios from 'axios';
 import Snoowrap from 'snoowrap';
+import Dot from 'dot';
 
 export default class bot {
 
@@ -81,7 +82,7 @@ export default class bot {
     }
 
     __initTemplateEngine() {
-        this.templateEngine = require("dot").process({ path: "./../views"});
+        this.templateEngine = Dot.process({ log: false, path: "./../views"});
     }
 
     getStandings() {
@@ -117,7 +118,7 @@ export default class bot {
                     }
                 ).catch(
                     ( error ) => {
-                        console.log(error);
+                        throw new Error(error);
                     }
                 );
             }).catch(
