@@ -1,0 +1,59 @@
+{
+  "name": "primeiraliga",
+  "version": "1.0.0",
+  "description": "simeple reddit bot to update the sidebar from live api",
+  "main": "index.js",
+  "scripts": {
+    "compile": "babel -q -d dist/ src/",
+    "lint": "eslint --ignore-path .gitignore . --cache",
+    "test": "npm run lint && npm run test:mocha",
+    "test:mocha": "npm run compile && mocha --compilers js:babel-core/register test/snoowrap.spec.js",
+    "test:browser": "npm run compile && browserify --im test/snoowrap.spec.js -o test/_browser.spec.js -t [ babelify ] && open test/run-tests.html",
+    "smoketest": "npm run test -- -g 'smoketest'",
+    "build-docs": "scripts/build_docs.sh",
+    "bundle-size": "npm run build-docs && gzip -c doc/snoowrap-v$(npm info . version).min.js | wc -c | xargs",
+    "coverage": "istanbul cover _mocha -- --compilers js:babel-core/register test/snoowrap.spec.js"
+  },
+  "files": [
+    "dist/"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stedop/primeiraliga.git"
+  },
+  "keywords": [
+    "reddit",
+    "bot",
+    "nodejs"
+  ],
+  "author": "Stephen Dop <dopstephen@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stedop/primeiraliga/issues"
+  },
+  "homepage": "https://github.com/stedop/primeiraliga#readme",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-plugin-lodash": "^3.2.6",
+    "babel-plugin-transform-async-to-generator": "^6.8.0",
+    "babel-plugin-transform-es2015-arrow-functions": "^6.8.0",
+    "babel-plugin-transform-es2015-block-scoping": "^6.14.0",
+    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.14.0",
+    "babel-plugin-transform-es2015-parameters": "^6.11.4",
+    "babel-plugin-transform-es2015-spread": "^6.8.0",
+    "babel-plugin-transform-es2015-template-literals": "^6.8.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babelify": "^7.3.0",
+    "eslint": "^3.14.1",
+    "eslint-config-google": "^0.7.1"
+  },
+  "dependencies": {
+    "axios": "^0.15.3",
+    "dot": "^1.1.1",
+    "lodash": "^4.17.4",
+    "node-env-file": "^0.1.8",
+    "node-rest-client": "^2.0.1",
+    "snoowrap": "^1.12.0"
+  }
+}
