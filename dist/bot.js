@@ -76,6 +76,7 @@ class bot {
 
         this.__initRedditClient();
         this.__initApiClient();
+        this.__initTemplateEngine();
     }
 
     __initRedditClient() {
@@ -100,6 +101,10 @@ class bot {
         this.apiClient = _axios2.default.create(clientArgs);
     }
 
+    __initTemplateEngine() {
+        this.templateEngine = require("dot").process({ path: "./../views" });
+    }
+
     getStandings() {
         var _this = this;
 
@@ -118,11 +123,12 @@ class bot {
         var _this2 = this;
 
         var subreddit = this.subreddit;
+        var templateEngine = this.templateEngine;
+
         this.getStandings().then(function (standingsData) {
             standingsData = (0, _take3.default)(standingsData, 10);
-            console.log(standingsData.length);
             _this2.redditClient.getSubreddit(subreddit).editSettings({
-                'description': JSON.stringify(standingsData)
+                'description': templateEngine.sidebar(standingsData)
             }).then(function (response) {
                 console.log(response);
                 console.log("done");
@@ -135,10 +141,5 @@ class bot {
     }
 }
 exports.default = bot;
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map

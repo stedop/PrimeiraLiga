@@ -30,11 +30,3 @@ var plBot = new _bot2.default(botConfig);
 plBot.updateSidebar();
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map

@@ -55,6 +55,7 @@ export default class bot {
 
         this.__initRedditClient();
         this.__initApiClient();
+        this.__initTemplateEngine();
     }
 
     __initRedditClient() {
@@ -79,6 +80,10 @@ export default class bot {
         this.apiClient = Axios.create(clientArgs);
     }
 
+    __initTemplateEngine() {
+        this.templateEngine = require("dot").process({ path: "./../views"});
+    }
+
     getStandings() {
         let standingsURI = "leagues/" + this.leagueSlug + "/seasons/" + this.leagueYear + "/standings";
 
@@ -96,13 +101,14 @@ export default class bot {
 
     updateSidebar() {
         let subreddit = this.subreddit;
+        let templateEngine = this.templateEngine;
+
         this.getStandings().then(
             ( standingsData ) => {
                 standingsData = take(standingsData, 10);
-                console.log(standingsData.length);
                 this.redditClient.getSubreddit(subreddit).editSettings(
                     {
-                        'description': JSON.stringify(standingsData)
+                        'description': templateEngine.sidebar(standingsData)
                     }
                 ).then(
                     (response) => {
