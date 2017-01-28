@@ -167,9 +167,7 @@ class bot {
         var _this4 = this;
 
         return new Promise(function (resolve, reject) {
-            _this4.getCompetition().then(function (data) {
-                return _this4.getStandings(data);
-            }).then(function (data) {
+            _this4.getStandings().then(function (data) {
                 return _this4.updateSidebar(data);
             }).then(function (data) {
                 resolve(data);
@@ -180,11 +178,6 @@ class bot {
     }
 }
 exports.default = bot;
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map

@@ -145,8 +145,7 @@ export default class bot {
 
     run() {
         return new Promise( (resolve, reject) => {
-            this.getCompetition()
-                .then( ( data ) => this.getStandings( data ) )
+            this.getStandings()
                 .then( ( data ) => this.updateSidebar( data ) )
                 .then(
                     (data) => {
