@@ -19,7 +19,13 @@ function _interopRequireDefault(obj) {
 (0, _nodeEnvFile2.default)(".env");
 
 var logger = new _winston2.default.Logger({
-    transports: [new _winston2.default.transports.Console(), new _winston2.default.transports.File({ filename: process.env.logFile })]
+    transports: [
+    //new (winston.transports.Console)(),
+    new _winston2.default.transports.File({
+        filename: "./logs/" + process.env.logFile,
+        handleExceptions: true,
+        humanReadableUnhandledException: true
+    })]
 });
 
 var botConfig = {
@@ -29,18 +35,13 @@ var botConfig = {
     'refreshToken': process.env.refreshToken,
     'subreddit': process.env.subreddit,
     'apiKey': process.env.apiKey,
-    'leagueSlug': process.env.leagueSlug,
-    'leagueYear': process.env.leagueYear
+    'leagueId': process.env.leagueId
 };
 
-try {
-    var plBot = new _bot2.default(botConfig);
-    plBot.updateSidebar();
-} catch (error) {
-    console.log(error);
-    logger.log(error);
-}
-//# sourceMappingURL=index.js.map
+var plBot = new _bot2.default(botConfig);
+plBot.run().then(function (data) {
+    logger.log('info', data.completed);
+}).catch('error', logger.log);
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

@@ -2,14 +2,18 @@ import bot from "./bot";
 import env from "node-env-file";
 import winston from "winston";
 
-env(".env");
+env( ".env" );
 
-const logger = new (winston.Logger)({
+const logger = new (winston.Logger)( {
     transports: [
-        new (winston.transports.Console)(),
-        new (winston.transports.File)({ filename: process.env.logFile })
+        //new (winston.transports.Console)(),
+        new (winston.transports.File)( {
+            filename: "./logs/" + process.env.logFile,
+            handleExceptions: true,
+            humanReadableUnhandledException: true
+        } )
     ]
-});
+} );
 
 const botConfig = {
     'userAgent': process.env.userAgent,
@@ -18,14 +22,15 @@ const botConfig = {
     'refreshToken': process.env.refreshToken,
     'subreddit': process.env.subreddit,
     'apiKey': process.env.apiKey,
-    'leagueSlug': process.env.leagueSlug,
-    'leagueYear': process.env.leagueYear
+    'leagueId': process.env.leagueId,
 };
 
-try {
-    const plBot = new bot(botConfig);
-    plBot.updateSidebar();
-} catch ( error ){
-    console.log(error);
-    logger.log(error);
-}
+const plBot = new bot( botConfig );
+plBot
+    .run()
+    .then(
+        ( data ) => {
+            logger.log( 'info', data.completed );
+        }
+    )
+    .catch( 'error', logger.log );

@@ -1,4 +1,6 @@
-Team | Points
----|---
-{{ for (var pos in it) { }}{{=it[pos].team }} | {{=it[pos].overall.points }}
+## {{=it.standings.leagueCaption}}
+
+| Pos.   | Team | Games   | Points    |
+|:------:|------|:-------:|:--------: |
+{{ for (var pos in it.standings.standing) { }}|    {{=it.standings.standing[pos].position}} | {{=it.standings.standing[pos].teamName }} |  {{=it.standings.standing[pos].playedGames }} |  {{=it.standings.standing[pos].points }} |
 {{ } }}

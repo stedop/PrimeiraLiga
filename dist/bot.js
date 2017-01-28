@@ -4,10 +4,6 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _take2 = require('lodash/take');
-
-var _take3 = _interopRequireDefault(_take2);
-
 var _defaults2 = require('lodash/defaults');
 
 var _defaults3 = _interopRequireDefault(_defaults2);
@@ -41,8 +37,7 @@ class bot {
      * @param {string} [refreshToken] A refresh token for your app.
      * @param {string} [subreddit] The subreddit name we are going to be managing
      * @param {string} [apiKey] Key for the stats api
-     * @param {string} [leagueSlug] the league identifier default is 'liga'
-     * @param {string} [leagueYear] the year identifier in the form order 16-17
+     * @param {string} [leagueId] Id for the competition
      */
     constructor() {
         var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
@@ -52,8 +47,7 @@ class bot {
             refreshToken = _ref.refreshToken,
             subreddit = _ref.subreddit,
             apiKey = _ref.apiKey,
-            leagueSlug = _ref.leagueSlug,
-            leagueYear = _ref.leagueYear;
+            leagueId = _ref.leagueId;
 
         if (clientId === undefined || clientSecret === undefined || refreshToken === undefined) {
             throw new Error('Reddit Credentials not supplied');
@@ -63,19 +57,26 @@ class bot {
             throw new Error('Api Key not supplied');
         }
 
-        if (leagueSlug === undefined || leagueYear === undefined) {
-            throw new Error('Need a league and a year');
+        if (leagueId === undefined) {
+            throw new Error('Need a competition ID');
         }
 
-        (0, _defaults3.default)(this, { userAgent, clientId, clientSecret, refreshToken, subreddit, apiKey, leagueSlug, leagueYear }, {
+        (0, _defaults3.default)(this, {
+            userAgent,
+            clientId,
+            clientSecret,
+            refreshToken,
+            subreddit,
+            apiKey,
+            leagueId
+        }, {
             userAgent: null,
             clientId: null,
             clientSecret: null,
             refreshToken: null,
             subbreddit: null,
             apiKey: null,
-            leagueSlug: "liga",
-            leagueYear: "16-17"
+            leagueId: 439
         });
 
         this.__initRedditClient();
@@ -94,10 +95,10 @@ class bot {
 
     __initApiClient() {
         var clientArgs = {
-            baseURL: 'https://sportsop-soccer-sports-open-data-v1.p.mashape.com/v1/',
+            baseURL: 'http://api.football-data.org/v1/',
             timeout: 10000,
             headers: {
-                "X-Mashape-Key": this.apiKey,
+                "X-Auth-Token": this.apiKey,
                 "Accept": "application/json",
                 "Content-Type": "application/json"
             }
@@ -112,11 +113,30 @@ class bot {
     getStandings() {
         var _this = this;
 
-        var standingsURI = "leagues/" + this.leagueSlug + "/seasons/" + this.leagueYear + "/standings";
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var standingsURI = "competitions/" + this.leagueId + "/leagueTable";
 
         return new Promise(function (resolve, reject) {
-            _this.apiClient.get(standingsURI).then(function (standings) {
-                resolve(standings.data.data.standings);
+            _this.apiClient.get(standingsURI).then(function (response) {
+                data.standings = response.data;
+                resolve(data);
+            }, function (error) {
+                reject(error);
+            });
+        });
+    }
+
+    getCompetition() {
+        var _this2 = this;
+
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var competitionUri = "competitions/" + this.leagueId;
+        return new Promise(function (resolve, reject) {
+            _this2.apiClient.get(competitionUri).then(function (response) {
+                data.competition = response.data;
+                resolve(data);
             }, function (error) {
                 reject(error);
             });
@@ -124,25 +144,38 @@ class bot {
     }
 
     updateSidebar() {
-        var _this2 = this;
+        var _this3 = this;
+
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
         var subreddit = this.subreddit;
-
-        this.getStandings().then(function (standingsData) {
-            standingsData = (0, _take3.default)(standingsData, 10);
-            console.log(_this2.templateEngine);
-            var desc = _this2.templateEngine.sidebar(standingsData);
-            console.log(desc);
-            _this2.redditClient.getSubreddit(subreddit).editSettings({
+        var desc = this.templateEngine.sidebar(data);
+        return new Promise(function (resolve, reject) {
+            _this3.redditClient.getSubreddit(subreddit).editSettings({
                 'description': desc
-            }).then(function (response) {
-                console.log(response);
-                console.log("done");
+            }).then(function () {
+                data.completed = {};
+                data.completed.updateSidebar = true;
+                resolve(data);
             }).catch(function (error) {
-                console.log(error);
+                reject(error);
             });
-        }).catch(function (error) {
-            console.log(error);
+        });
+    }
+
+    run() {
+        var _this4 = this;
+
+        return new Promise(function (resolve, reject) {
+            _this4.getCompetition().then(function (data) {
+                return _this4.getStandings(data);
+            }).then(function (data) {
+                return _this4.updateSidebar(data);
+            }).then(function (data) {
+                resolve(data);
+            }).catch(function (error) {
+                reject(error);
+            });
         });
     }
 }
