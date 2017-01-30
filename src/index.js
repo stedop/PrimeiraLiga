@@ -6,7 +6,7 @@ env( ".env" );
 
 const logger = new (winston.Logger)( {
     transports: [
-        //new (winston.transports.Console)(),
+//        new (winston.transports.Console)(),
         new (winston.transports.File)( {
             filename: "./logs/" + process.env.logFile,
             handleExceptions: true,

@@ -20,7 +20,7 @@ function _interopRequireDefault(obj) {
 
 var logger = new _winston2.default.Logger({
     transports: [
-    //new (winston.transports.Console)(),
+    //        new (winston.transports.Console)(),
     new _winston2.default.transports.File({
         filename: "./logs/" + process.env.logFile,
         handleExceptions: true,

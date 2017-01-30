@@ -110,6 +110,24 @@ class bot {
         this.templateEngine = _dot2.default.process({ templateSettings: { strip: false }, path: 'views/' });
     }
 
+    __replaceText() {
+        var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            old = _ref2.old,
+            begin = _ref2.begin,
+            end = _ref2.end,
+            replacement = _ref2.replacement;
+
+        var regstring = '(' + begin + ')([\\s\\S]*?)(\\*\\*\\*\\*\\*\\*)';
+        var regex = new RegExp(regstring, 'i');
+        return old.replace(regex, replacement);
+    }
+
+    /**
+     * get the current standings
+     *
+     * @param data
+     * @returns {Promise}
+     */
     getStandings() {
         var _this = this;
 
@@ -143,37 +161,71 @@ class bot {
         });
     }
 
-    updateSidebar() {
+    /**
+     * Handles the replacements
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    formatSidebarText() {
         var _this3 = this;
 
         var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
         var subreddit = this.subreddit;
-        var desc = this.templateEngine.sidebar(data);
+        var table = this.templateEngine.table(data);
+        var beginText = '## ' + data.standings.leagueCaption;
+        var endText = '\\n\\n\\n----';
         return new Promise(function (resolve, reject) {
-            _this3.redditClient.getSubreddit(subreddit).editSettings({
-                'description': desc
+            _this3.redditClient.getSubreddit(subreddit).getSettings().then(function (settings) {
+                data.sidebar = _this3.__replaceText({
+                    'old': settings.description,
+                    'begin': beginText,
+                    'end': endText,
+                    'replacement': table
+                });
+                resolve(data);
+            }, function (error) {
+                reject(error);
+            });
+        });
+    }
+
+    /**
+     * Updates the sidebar
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    updateSidebar() {
+        var _this4 = this;
+
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        var subreddit = this.subreddit;
+
+        return new Promise(function (resolve, reject) {
+            _this4.redditClient.getSubreddit(subreddit).editSettings({
+                'description': data.sidebar
             }).then(function () {
                 data.completed = {};
                 data.completed.updateSidebar = true;
                 resolve(data);
-            }).catch(function (error) {
+            }, function (error) {
                 reject(error);
             });
         });
     }
 
     run() {
-        var _this4 = this;
+        var _this5 = this;
 
         return new Promise(function (resolve, reject) {
-            _this4.getStandings().then(function (data) {
-                return _this4.updateSidebar(data);
+            _this5.getStandings().then(function (data) {
+                return _this5.formatSidebarText(data);
             }).then(function (data) {
-                resolve(data);
-            }).catch(function (error) {
-                reject(error);
-            });
+                return _this5.updateSidebar(data);
+            }).then(resolve).catch(reject);
         });
     }
 }

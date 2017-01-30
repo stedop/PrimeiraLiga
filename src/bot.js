@@ -90,6 +90,23 @@ export default class bot {
         this.templateEngine = Dot.process( { templateSettings: { strip: false }, path: 'views/' } );
     }
 
+    __replaceText( {
+        old,
+        begin,
+        end,
+        replacement
+    } = {} ) {
+        let regstring = '(' + begin + ')([\\s\\S]*?)(\\*\\*\\*\\*\\*\\*)';
+        let regex = new RegExp(regstring, 'i');
+        return old.replace( regex, replacement );
+    }
+
+    /**
+     * get the current standings
+     *
+     * @param data
+     * @returns {Promise}
+     */
     getStandings( data = {} ) {
         let standingsURI = "competitions/" + this.leagueId + "/leagueTable";
 
@@ -121,21 +138,56 @@ export default class bot {
         } );
     }
 
+    /**
+     * Handles the replacements
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    formatSidebarText( data = {} ) {
+        let subreddit = this.subreddit;
+        let table = this.templateEngine.table( data );
+        let beginText = '## ' + data.standings.leagueCaption;
+        let endText = '\\n\\n\\n----';
+        return new Promise( (resolve, reject ) => {
+            this.redditClient.getSubreddit( subreddit ).getSettings()
+                .then(
+                    ( settings ) => {
+                        data.sidebar = this.__replaceText( {
+                            'old': settings.description,
+                            'begin': beginText,
+                            'end': endText,
+                            'replacement': table
+                        } );
+                        resolve( data );
+                    },
+                    ( error ) => {
+                        reject( error );
+                    }
+                );
+        } );
+    }
+
+    /**
+     * Updates the sidebar
+     *
+     * @param data
+     * @returns {Promise}
+     */
     updateSidebar( data = {} ) {
         let subreddit = this.subreddit;
-        let desc = this.templateEngine.sidebar( data );
+
         return new Promise( ( resolve, reject ) => {
             this.redditClient.getSubreddit( subreddit ).editSettings(
                 {
-                    'description': desc
+                    'description': data.sidebar
                 }
             ).then(
                 () => {
                     data.completed = {};
                     data.completed.updateSidebar = true;
                     resolve( data );
-                }
-            ).catch(
+                },
                 ( error ) => {
                     reject( error );
                 }
@@ -144,21 +196,13 @@ export default class bot {
     }
 
     run() {
-        return new Promise( (resolve, reject) => {
+        return new Promise( ( resolve, reject ) => {
             this.getStandings()
+                .then( ( data ) => this.formatSidebarText( data ) )
                 .then( ( data ) => this.updateSidebar( data ) )
-                .then(
-                    (data) => {
-                        resolve( data );
-                    }
-                )
-                .catch(
-                    ( error ) => {
-                        reject( error );
-                    }
-                );
-        });
+                .then(resolve)
+                .catch(reject);
+        } );
 
     }
 }
-
