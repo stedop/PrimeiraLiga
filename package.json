@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "babel -q -d dist/ src/",
-    "smoketest": "npm run test -- -g 'smoketest'",
+    "smoketest": "npm run test -- -g 'smoketest'"
   },
   "files": [
     "dist/"
