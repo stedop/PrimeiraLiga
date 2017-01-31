@@ -5,10 +5,7 @@
   "main": "index.js",
   "scripts": {
     "compile": "babel -q -d dist/ src/",
-    "test": "npm run lint && npm run test:mocha",
-    "test:mocha": "npm run compile && mocha --compilers js:babel-core/register test/bot.spec.js",
     "smoketest": "npm run test -- -g 'smoketest'",
-    "coverage": "istanbul cover _mocha -- --compilers js:babel-core/register test/bot.spec.js"
   },
   "files": [
     "dist/"
