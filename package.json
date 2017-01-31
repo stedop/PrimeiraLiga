@@ -1,18 +1,15 @@
 {
   "name": "primeiraliga",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "simeple reddit bot to update the sidebar from live api",
   "main": "index.js",
   "scripts": {
     "compile": "babel -q -d dist/ src/",
     "lint": "eslint --ignore-path .gitignore . --cache",
     "test": "npm run lint && npm run test:mocha",
-    "test:mocha": "npm run compile && mocha --compilers js:babel-core/register test/snoowrap.spec.js",
-    "test:browser": "npm run compile && browserify --im test/snoowrap.spec.js -o test/_browser.spec.js -t [ babelify ] && open test/run-tests.html",
+    "test:mocha": "npm run compile && mocha --compilers js:babel-core/register test/bot.spec.js",
     "smoketest": "npm run test -- -g 'smoketest'",
-    "build-docs": "scripts/build_docs.sh",
-    "bundle-size": "npm run build-docs && gzip -c doc/snoowrap-v$(npm info . version).min.js | wc -c | xargs",
-    "coverage": "istanbul cover _mocha -- --compilers js:babel-core/register test/snoowrap.spec.js"
+    "coverage": "istanbul cover _mocha -- --compilers js:babel-core/register test/bot.spec.js"
   },
   "files": [
     "dist/"
@@ -53,7 +50,6 @@
     "dot": "^1.1.1",
     "lodash": "^4.17.4",
     "node-env-file": "^0.1.8",
-    "node-rest-client": "^2.0.1",
     "snoowrap": "^1.12.0",
     "winston": "^2.3.1"
   }
