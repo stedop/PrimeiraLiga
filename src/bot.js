@@ -64,6 +64,11 @@ export default class bot {
         this.__initTemplateEngine();
     }
 
+    /**
+     * Sets up snoowrap
+     *
+     * @private
+     */
     __initRedditClient() {
         this.redditClient = new Snoowrap( {
             userAgent: this.userAgent,
@@ -73,6 +78,11 @@ export default class bot {
         } );
     }
 
+    /**
+     * Sets up the Axios api client
+     *
+     * @private
+     */
     __initApiClient() {
         let clientArgs = {
             baseURL: 'http://api.football-data.org/v1/',
@@ -86,10 +96,25 @@ export default class bot {
         this.apiClient = Axios.create( clientArgs );
     }
 
+    /**
+     * Sets up the Dot template engine
+     *
+     * @private
+     */
     __initTemplateEngine() {
         this.templateEngine = Dot.process( { templateSettings: { strip: false }, path: 'views/' } );
     }
 
+    /**
+     * Handles the text replacements
+     *
+     * @param old
+     * @param begin
+     * @param end
+     * @param replacement
+     * @returns {string|*|void|XML}
+     * @private
+     */
     __replaceText( {
         old,
         begin,
@@ -97,7 +122,7 @@ export default class bot {
         replacement
     } = {} ) {
         let regstring = '(' + begin + ')([\\s\\S]*?)(\\*\\*\\*\\*\\*\\*)';
-        let regex = new RegExp(regstring, 'i');
+        let regex = new RegExp( regstring, 'i' );
         return old.replace( regex, replacement );
     }
 
@@ -123,6 +148,12 @@ export default class bot {
         } );
     }
 
+    /**
+     * Gets the competition data
+     *
+     * @param data
+     * @returns {Promise}
+     */
     getCompetition( data = {} ) {
         let competitionUri = "competitions/" + this.leagueId;
         return new Promise( ( resolve, reject ) => {
@@ -139,34 +170,71 @@ export default class bot {
     }
 
     /**
-     * Handles the replacements
+     * Get fixtures
      *
      * @param data
      * @returns {Promise}
      */
-    formatSidebarText( data = {} ) {
-        let subreddit = this.subreddit;
-        let table = this.templateEngine.table( data );
-        let beginText = '## ' + data.standings.leagueCaption;
-        let endText = '\\n\\n\\n----';
-        return new Promise( (resolve, reject ) => {
-            this.redditClient.getSubreddit( subreddit ).getSettings()
-                .then(
-                    ( settings ) => {
-                        data.sidebar = this.__replaceText( {
-                            'old': settings.description,
-                            'begin': beginText,
-                            'end': endText,
-                            'replacement': table
-                        } );
-                        resolve( data );
-                    },
-                    ( error ) => {
-                        reject( error );
-                    }
-                );
+    getFixtures( data = {} ) {
+        return new Promise( ( resolve ) => {
+            resolve( data );
         } );
     }
+
+    /**
+     * Gets the current sidebar
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    getCurrentSideBar( data = {} ) {
+        return new Promise( ( resolve, reject ) => {
+            this.redditClient.getSubreddit( this.subreddit ).getSettings().then(
+                ( settings ) => {
+                    data.sidebar = settings.description;
+                    resolve( data );
+                }, reject
+            );
+        } );
+
+    }
+
+    /**
+     * Handles the league table insert
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    doTable( data = {} ) {
+        return new Promise( ( resolve ) => {
+            data.sidebar = this.__replaceText( {
+                'old': data.sidebar,
+                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption + ' - Current Table',
+                'end': '\\n\\n\\n******',
+                'replacement': this.templateEngine.table( data )
+            } );
+            resolve( data );
+        } );
+    }
+
+    /**
+     * Handles the standing insert
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    doFixtures( data = {} ) {
+        return new Promise( ( resolve ) => {
+            data.sidebar = this.__replaceText( {
+                'old': data.sidebar,
+                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption,
+                'end': '\\n\\n\\n******',
+                'replacement': this.templateEngine.table( data )
+            } );
+            resolve( data );
+        } );
+    }
+
 
     /**
      * Updates the sidebar
@@ -195,14 +263,16 @@ export default class bot {
         } );
     }
 
+    /**
+     * Runs the whole thing together - tbh I'm not sure this should be here and not in the index file
+     */
     run() {
-        return new Promise( ( resolve, reject ) => {
-            this.getStandings()
-                .then( ( data ) => this.formatSidebarText( data ) )
-                .then( ( data ) => this.updateSidebar( data ) )
-                .then(resolve)
-                .catch(reject);
-        } );
-
+        this.getStandings()
+            .then( ( data ) => this.getCurrentSideBar( data ) )
+            .then( ( data ) => this.getStandings( data ) )
+            .then( ( data ) => this.getFixtures( data ) )
+            .then( ( data ) => this.doTable( data ) )
+            .then( ( data ) => this.doFixtures( data ) )
+            .then( ( data ) => this.updateSidebar( data ) );
     }
 }

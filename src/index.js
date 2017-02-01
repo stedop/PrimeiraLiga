@@ -33,4 +33,4 @@ plBot
             logger.log( 'info', data.completed );
         }
     )
-    .catch( 'error', logger.log );
+    .catch( logger.log );

@@ -84,6 +84,11 @@ class bot {
         this.__initTemplateEngine();
     }
 
+    /**
+     * Sets up snoowrap
+     *
+     * @private
+     */
     __initRedditClient() {
         this.redditClient = new _snoowrap2.default({
             userAgent: this.userAgent,
@@ -93,6 +98,11 @@ class bot {
         });
     }
 
+    /**
+     * Sets up the Axios api client
+     *
+     * @private
+     */
     __initApiClient() {
         var clientArgs = {
             baseURL: 'http://api.football-data.org/v1/',
@@ -106,10 +116,25 @@ class bot {
         this.apiClient = _axios2.default.create(clientArgs);
     }
 
+    /**
+     * Sets up the Dot template engine
+     *
+     * @private
+     */
     __initTemplateEngine() {
         this.templateEngine = _dot2.default.process({ templateSettings: { strip: false }, path: 'views/' });
     }
 
+    /**
+     * Handles the text replacements
+     *
+     * @param old
+     * @param begin
+     * @param end
+     * @param replacement
+     * @returns {string|*|void|XML}
+     * @private
+     */
     __replaceText() {
         var _ref2 = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
             old = _ref2.old,
@@ -145,6 +170,12 @@ class bot {
         });
     }
 
+    /**
+     * Gets the competition data
+     *
+     * @param data
+     * @returns {Promise}
+     */
     getCompetition() {
         var _this2 = this;
 
@@ -162,32 +193,79 @@ class bot {
     }
 
     /**
-     * Handles the replacements
+     * Get fixtures
      *
      * @param data
      * @returns {Promise}
      */
-    formatSidebarText() {
+    getFixtures() {
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        return new Promise(function (resolve) {
+            resolve(data);
+        });
+    }
+
+    /**
+     * Gets the current sidebar
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    getCurrentSideBar() {
         var _this3 = this;
 
         var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        var subreddit = this.subreddit;
-        var table = this.templateEngine.table(data);
-        var beginText = '## ' + data.standings.leagueCaption;
-        var endText = '\\n\\n\\n----';
         return new Promise(function (resolve, reject) {
-            _this3.redditClient.getSubreddit(subreddit).getSettings().then(function (settings) {
-                data.sidebar = _this3.__replaceText({
-                    'old': settings.description,
-                    'begin': beginText,
-                    'end': endText,
-                    'replacement': table
-                });
+            _this3.redditClient.getSubreddit(_this3.subreddit).getSettings().then(function (settings) {
+                data.sidebar = settings.description;
                 resolve(data);
-            }, function (error) {
-                reject(error);
+            }, reject);
+        });
+    }
+
+    /**
+     * Handles the league table insert
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    doTable() {
+        var _this4 = this;
+
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        return new Promise(function (resolve) {
+            data.sidebar = _this4.__replaceText({
+                'old': data.sidebar,
+                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption + ' - Current Table',
+                'end': '\\n\\n\\n******',
+                'replacement': _this4.templateEngine.table(data)
             });
+            resolve(data);
+        });
+    }
+
+    /**
+     * Handles the standing insert
+     *
+     * @param data
+     * @returns {Promise}
+     */
+    doFixtures() {
+        var _this5 = this;
+
+        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+        return new Promise(function (resolve) {
+            data.sidebar = _this5.__replaceText({
+                'old': data.sidebar,
+                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption,
+                'end': '\\n\\n\\n******',
+                'replacement': _this5.templateEngine.table(data)
+            });
+            resolve(data);
         });
     }
 
@@ -198,14 +276,14 @@ class bot {
      * @returns {Promise}
      */
     updateSidebar() {
-        var _this4 = this;
+        var _this6 = this;
 
         var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
         var subreddit = this.subreddit;
 
         return new Promise(function (resolve, reject) {
-            _this4.redditClient.getSubreddit(subreddit).editSettings({
+            _this6.redditClient.getSubreddit(subreddit).editSettings({
                 'description': data.sidebar
             }).then(function () {
                 data.completed = {};
@@ -217,40 +295,27 @@ class bot {
         });
     }
 
+    /**
+     * Runs the whole thing together - tbh I'm not sure this should be here and not in the index file
+     */
     run() {
-        var _this5 = this;
+        var _this7 = this;
 
-        return new Promise(function (resolve, reject) {
-            _this5.getStandings().then(function (data) {
-                return _this5.formatSidebarText(data);
-            }).then(function (data) {
-                return _this5.updateSidebar(data);
-            }).then(resolve).catch(reject);
+        this.getStandings().then(function (data) {
+            return _this7.getCurrentSideBar(data);
+        }).then(function (data) {
+            return _this7.getStandings(data);
+        }).then(function (data) {
+            return _this7.getFixtures(data);
+        }).then(function (data) {
+            return _this7.doTable(data);
+        }).then(function (data) {
+            return _this7.doFixtures(data);
+        }).then(function (data) {
+            return _this7.updateSidebar(data);
         });
     }
 }
 exports.default = bot;
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
-//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map

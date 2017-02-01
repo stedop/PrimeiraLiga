@@ -41,41 +41,6 @@ var botConfig = {
 var plBot = new _bot2.default(botConfig);
 plBot.run().then(function (data) {
     logger.log('info', data.completed);
-}).catch('error', logger.log);
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
+}).catch(logger.log);
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
