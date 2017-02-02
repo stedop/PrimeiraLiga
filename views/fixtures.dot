@@ -1,15 +1,8 @@
-# [](#pt-NOS)Primeira Liga - Fixture 19
+# [](#pt-NOS) {{=it.standings.leagueCaption}} - Fixtures
 
 Date | Home | Away
 ---|---------|---------
-27 Jan. |  [Boavista](#pt-BOA)  |  [Belenenses](#CFOB)
-28 Jan. |  [Tondela](#pt-CDT)  |  [Chaves](#pt-CVS)
-28 Jan.  |  [Nacional](#pt-CDN)  | [Arouca](#pt-AROU)
-28 Jan.  |  [V. Guimarães](#pt-VSC) | [Marítimo](#pt-CSM)
-28 Jan.  |   [Estoril](#pt-GDP) | [FC Porto](#pt-FCP)
-28 Jan.  |  [Sporting](#pt-SCP) | [P. Ferreira](#pt-FCPF)
-30 Jan.  |  [Moreirense](#pt-MOR)| [Feirense](#pt-CDF)
-30 Jan.  | [V. Setúbal](#pt-VFC)   | [Benfica](#pt-SLB)
-30 Jan.  |  [Rio Ave](#pt-RAFC)  | [Sp. Braga](#pt-SCB)
+{{ for (var pos in it.fixtures) { }}|    {{=it.fixtures[pos].date}} | [](#{{=it.fixtures[pos].homeTeamStyle}}) {{=it.fixtures[pos].homeTeamName}} | [](#{{=it.fixtures[pos].awayTeamStyle}}) {{=it.fixtures[pos].awayTeamName}} |
+{{ } }}
 
 ******

@@ -1,9 +1,11 @@
 'use strict';
 
-import { defaults } from 'lodash';
+import { defaults, each, merge, find, sortBy } from 'lodash';
 import Axios from 'axios';
 import Snoowrap from 'snoowrap';
 import Dot from 'dot';
+import TeamCodes from './teamcodes';
+import DateFormat from 'dateformat';
 
 export default class bot {
 
@@ -58,6 +60,12 @@ export default class bot {
             apiKey: null,
             leagueId: 439
         } );
+
+        this.standingsURI = "competitions/" + this.leagueId + "/leagueTable";
+        this.fixturesURI = "competitions/" + this.leagueId + "/fixtures?timeFrame=n7";
+        this.competitionUri = "competitions/" + this.leagueId;
+        this.data = {};
+        this.errorBag = {};
 
         this.__initRedditClient();
         this.__initApiClient();
@@ -126,153 +134,174 @@ export default class bot {
         return old.replace( regex, replacement );
     }
 
-    /**
-     * get the current standings
-     *
-     * @param data
-     * @returns {Promise}
-     */
-    getStandings( data = {} ) {
-        let standingsURI = "competitions/" + this.leagueId + "/leagueTable";
-
-        return new Promise( ( resolve, reject ) => {
-            this.apiClient.get( standingsURI ).then(
-                ( response ) => {
-                    data.standings = response.data;
-                    resolve( data );
-                },
-                ( error ) => {
-                    reject( error );
-                }
-            );
-        } );
+    getStandings() {
+        return this.apiClient.get( this.standingsURI ).then(
+            ( response ) => {
+                this.data.standings = response.data;
+            }
+        );
     }
 
-    /**
-     * Gets the competition data
-     *
-     * @param data
-     * @returns {Promise}
-     */
-    getCompetition( data = {} ) {
-        let competitionUri = "competitions/" + this.leagueId;
-        return new Promise( ( resolve, reject ) => {
-            this.apiClient.get( competitionUri ).then(
+    getFixtures() {
+        return this.apiClient.get( this.fixturesURI )
+            .then(
                 ( response ) => {
-                    data.competition = response.data;
-                    resolve( data );
-                },
-                ( error ) => {
-                    reject( error );
+                    this.data.fixtures = response.data.fixtures;
                 }
             );
-        } );
+
     }
 
-    /**
-     * Get fixtures
-     *
-     * @param data
-     * @returns {Promise}
-     */
-    getFixtures( data = {} ) {
-        return new Promise( ( resolve ) => {
-            resolve( data );
-        } );
+    getCompetition() {
+        return this.apiClient.get( this.competitionUri )
+            .then(
+                ( response ) => {
+                    this.data.competition = response.data;
+                }
+            );
     }
 
     /**
      * Gets the current sidebar
      *
-     * @param data
      * @returns {Promise}
      */
-    getCurrentSideBar( data = {} ) {
-        return new Promise( ( resolve, reject ) => {
-            this.redditClient.getSubreddit( this.subreddit ).getSettings().then(
-                ( settings ) => {
-                    data.sidebar = settings.description;
-                    resolve( data );
-                }, reject
-            );
-        } );
-
+    getCurrentSideBar() {
+        return this.redditClient.getSubreddit( this.subreddit ).getSettings().then(
+            ( response ) => {
+                this.data.sidebar = response.description;
+            } );
     }
+
+    /**
+     * get the data form the API
+     *
+     * @returns {Promise}
+     */
+    getData() {
+        return Promise
+            .all(
+                [
+                    this.getStandings(),
+                    this.getFixtures(),
+                    this.getCompetition(),
+                    this.getCurrentSideBar()
+                ]
+            );
+    }
+
 
     /**
      * Handles the league table insert
      *
-     * @param data
-     * @returns {Promise}
+     * @returns bot
      */
-    doTable( data = {} ) {
-        return new Promise( ( resolve ) => {
-            data.sidebar = this.__replaceText( {
-                'old': data.sidebar,
-                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption + ' - Current Table',
-                'end': '\\n\\n\\n******',
-                'replacement': this.templateEngine.table( data )
-            } );
-            resolve( data );
+    doTable() {
+        let self = this;
+
+        const update = function(arr, key, newval) {
+            let match = find(arr, key);
+
+            if(match) {
+                merge( match, newval );
+            } else {
+                arr.push( newval );
+            }
+        };
+
+        // add the team badges
+        each(this.data.standings.standing, function(entry) {
+            update(
+                self.data.standings.standing,
+                { 'teamName': entry.teamName },
+                { 'style' : TeamCodes[entry.teamName] }
+            );
+        });
+
+        this.data.sidebar = this.__replaceText( {
+            'old': this.data.sidebar,
+            //# [](#pt-NOS) Primeira Liga 2016/17 - Current Table
+            'begin': '# \\[\\]\\(\\#pt-NOS\\) ' + this.data.standings.leagueCaption + ' - Current Table',
+            'end': '******',
+            'replacement': this.templateEngine.table( this.data )
         } );
+
+        return this;
     }
 
     /**
      * Handles the standing insert
      *
-     * @param data
-     * @returns {Promise}
+     * @returns bot
      */
-    doFixtures( data = {} ) {
-        return new Promise( ( resolve ) => {
-            data.sidebar = this.__replaceText( {
-                'old': data.sidebar,
-                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption,
-                'end': '\\n\\n\\n******',
-                'replacement': this.templateEngine.table( data )
-            } );
-            resolve( data );
+    doFixtures() {
+        let self = this;
+
+        const update = function(arr, key, newval) {
+            let match = find(arr, key);
+
+            if(match) {
+                merge( match, newval );
+            } else {
+                arr.push( newval );
+            }
+        };
+
+        // ensure that the fixtures are sorted properly
+        this.data.fixtures = sortBy(this.data.fixtures, ['date']);
+
+        each(this.data.fixtures, function(entry) {
+            let date = new Date(entry.date);
+
+            // add the team badges
+            update(
+                self.data.fixtures,
+                { 'homeTeamName': entry.homeTeamName },
+                { 'homeTeamStyle' : TeamCodes[entry.homeTeamName] }
+            );
+            update(
+                self.data.fixtures,
+                { 'awayTeamName': entry.awayTeamName },
+                { 'awayTeamStyle' : TeamCodes[entry.awayTeamName] }
+            );
+
+            //format the date
+            update(
+                self.data.fixtures,
+                { 'date': entry.date },
+                { 'date' :  DateFormat(date, 'dd mmm.')}
+            );
+        });
+
+
+        this.data.sidebar = this.__replaceText( {
+            'old': this.data.sidebar,
+            'begin': '# \\[\\]\\(\\#pt-NOS\\) ' + this.data.standings.leagueCaption + ' - Fixtures',
+            'end': '\\n\\n\\n******',
+            'replacement': this.templateEngine.fixtures( this.data )
         } );
+
+        return this;
     }
 
 
     /**
      * Updates the sidebar
      *
-     * @param data
      * @returns {Promise}
      */
-    updateSidebar( data = {} ) {
+    updateSidebar() {
         let subreddit = this.subreddit;
 
-        return new Promise( ( resolve, reject ) => {
-            this.redditClient.getSubreddit( subreddit ).editSettings(
-                {
-                    'description': data.sidebar
-                }
-            ).then(
-                () => {
-                    data.completed = {};
-                    data.completed.updateSidebar = true;
-                    resolve( data );
-                },
-                ( error ) => {
-                    reject( error );
-                }
-            );
-        } );
-    }
-
-    /**
-     * Runs the whole thing together - tbh I'm not sure this should be here and not in the index file
-     */
-    run() {
-        this.getStandings()
-            .then( ( data ) => this.getCurrentSideBar( data ) )
-            .then( ( data ) => this.getStandings( data ) )
-            .then( ( data ) => this.getFixtures( data ) )
-            .then( ( data ) => this.doTable( data ) )
-            .then( ( data ) => this.doFixtures( data ) )
-            .then( ( data ) => this.updateSidebar( data ) );
+        return this.redditClient.getSubreddit( subreddit ).editSettings(
+            {
+                'description': this.data.sidebar
+            }
+        ).then(
+            () => {
+                this.data.completed = {};
+                this.data.completed.updateSidebar = true;
+            }
+        );
     }
 }

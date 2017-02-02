@@ -6,12 +6,12 @@ env( ".env" );
 
 const logger = new (winston.Logger)( {
     transports: [
-//        new (winston.transports.Console)(),
-        new (winston.transports.File)( {
+        new (winston.transports.Console)(),
+        /*new (winston.transports.File)( {
             filename: "./logs/" + process.env.logFile,
             handleExceptions: true,
             humanReadableUnhandledException: true
-        } )
+        } )*/
     ]
 } );
 
@@ -26,11 +26,20 @@ const botConfig = {
 };
 
 const plBot = new bot( botConfig );
+
 plBot
-    .run()
-    .then(
-        ( data ) => {
-            logger.log( 'info', data.completed );
+    .getData()
+    .then( () => {
+        try {
+            plBot.doTable().doFixtures().updateSidebar();
+            logger.log('complete', plBot.data.completed);
+            console.log(plBot.data);
+        } catch (error) {
+            logger.log('error', error);
         }
-    )
-    .catch( logger.log );
+    } )
+    .catch(
+        (error) => {
+            logger.log('error', error);
+        }
+    );

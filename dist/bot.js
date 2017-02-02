@@ -4,6 +4,22 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _sortBy2 = require('lodash/sortBy');
+
+var _sortBy3 = _interopRequireDefault(_sortBy2);
+
+var _find2 = require('lodash/find');
+
+var _find3 = _interopRequireDefault(_find2);
+
+var _merge2 = require('lodash/merge');
+
+var _merge3 = _interopRequireDefault(_merge2);
+
+var _each2 = require('lodash/each');
+
+var _each3 = _interopRequireDefault(_each2);
+
 var _defaults2 = require('lodash/defaults');
 
 var _defaults3 = _interopRequireDefault(_defaults2);
@@ -19,6 +35,14 @@ var _snoowrap2 = _interopRequireDefault(_snoowrap);
 var _dot = require('dot');
 
 var _dot2 = _interopRequireDefault(_dot);
+
+var _teamcodes = require('./teamcodes');
+
+var _teamcodes2 = _interopRequireDefault(_teamcodes);
+
+var _dateformat = require('dateformat');
+
+var _dateformat2 = _interopRequireDefault(_dateformat);
 
 function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : { default: obj };
@@ -78,6 +102,12 @@ class bot {
             apiKey: null,
             leagueId: 439
         });
+
+        this.standingsURI = "competitions/" + this.leagueId + "/leagueTable";
+        this.fixturesURI = "competitions/" + this.leagueId + "/fixtures?timeFrame=n7";
+        this.competitionUri = "competitions/" + this.leagueId;
+        this.data = {};
+        this.errorBag = {};
 
         this.__initRedditClient();
         this.__initApiClient();
@@ -147,172 +177,143 @@ class bot {
         return old.replace(regex, replacement);
     }
 
-    /**
-     * get the current standings
-     *
-     * @param data
-     * @returns {Promise}
-     */
     getStandings() {
         var _this = this;
 
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        var standingsURI = "competitions/" + this.leagueId + "/leagueTable";
-
-        return new Promise(function (resolve, reject) {
-            _this.apiClient.get(standingsURI).then(function (response) {
-                data.standings = response.data;
-                resolve(data);
-            }, function (error) {
-                reject(error);
-            });
+        return this.apiClient.get(this.standingsURI).then(function (response) {
+            _this.data.standings = response.data;
         });
     }
 
-    /**
-     * Gets the competition data
-     *
-     * @param data
-     * @returns {Promise}
-     */
-    getCompetition() {
+    getFixtures() {
         var _this2 = this;
 
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        var competitionUri = "competitions/" + this.leagueId;
-        return new Promise(function (resolve, reject) {
-            _this2.apiClient.get(competitionUri).then(function (response) {
-                data.competition = response.data;
-                resolve(data);
-            }, function (error) {
-                reject(error);
-            });
+        return this.apiClient.get(this.fixturesURI).then(function (response) {
+            _this2.data.fixtures = response.data.fixtures;
         });
     }
 
-    /**
-     * Get fixtures
-     *
-     * @param data
-     * @returns {Promise}
-     */
-    getFixtures() {
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    getCompetition() {
+        var _this3 = this;
 
-        return new Promise(function (resolve) {
-            resolve(data);
+        return this.apiClient.get(this.competitionUri).then(function (response) {
+            _this3.data.competition = response.data;
         });
     }
 
     /**
      * Gets the current sidebar
      *
-     * @param data
      * @returns {Promise}
      */
     getCurrentSideBar() {
-        var _this3 = this;
+        var _this4 = this;
 
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
-        return new Promise(function (resolve, reject) {
-            _this3.redditClient.getSubreddit(_this3.subreddit).getSettings().then(function (settings) {
-                data.sidebar = settings.description;
-                resolve(data);
-            }, reject);
+        return this.redditClient.getSubreddit(this.subreddit).getSettings().then(function (response) {
+            _this4.data.sidebar = response.description;
         });
+    }
+
+    /**
+     * get the data form the API
+     *
+     * @returns {Promise}
+     */
+    getData() {
+        return Promise.all([this.getStandings(), this.getFixtures(), this.getCompetition(), this.getCurrentSideBar()]);
     }
 
     /**
      * Handles the league table insert
      *
-     * @param data
-     * @returns {Promise}
+     * @returns bot
      */
     doTable() {
-        var _this4 = this;
+        var self = this;
 
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var update = function (arr, key, newval) {
+            var match = (0, _find3.default)(arr, key);
 
-        return new Promise(function (resolve) {
-            data.sidebar = _this4.__replaceText({
-                'old': data.sidebar,
-                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption + ' - Current Table',
-                'end': '\\n\\n\\n******',
-                'replacement': _this4.templateEngine.table(data)
-            });
-            resolve(data);
+            if (match) {
+                (0, _merge3.default)(match, newval);
+            } else {
+                arr.push(newval);
+            }
+        };
+
+        // add the team badges
+        (0, _each3.default)(this.data.standings.standing, function (entry) {
+            update(self.data.standings.standing, { 'teamName': entry.teamName }, { 'style': _teamcodes2.default[entry.teamName] });
         });
+
+        this.data.sidebar = this.__replaceText({
+            'old': this.data.sidebar,
+            //# [](#pt-NOS) Primeira Liga 2016/17 - Current Table
+            'begin': '# \\[\\]\\(\\#pt-NOS\\) ' + this.data.standings.leagueCaption + ' - Current Table',
+            'end': '******',
+            'replacement': this.templateEngine.table(this.data)
+        });
+
+        return this;
     }
 
     /**
      * Handles the standing insert
      *
-     * @param data
-     * @returns {Promise}
+     * @returns bot
      */
     doFixtures() {
-        var _this5 = this;
+        var self = this;
 
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var update = function (arr, key, newval) {
+            var match = (0, _find3.default)(arr, key);
 
-        return new Promise(function (resolve) {
-            data.sidebar = _this5.__replaceText({
-                'old': data.sidebar,
-                'begin': '# [](#pt-NOS)' + data.standings.leagueCaption,
-                'end': '\\n\\n\\n******',
-                'replacement': _this5.templateEngine.table(data)
-            });
-            resolve(data);
+            if (match) {
+                (0, _merge3.default)(match, newval);
+            } else {
+                arr.push(newval);
+            }
+        };
+
+        // ensure that the fixtures are sorted properly
+        this.data.fixtures = (0, _sortBy3.default)(this.data.fixtures, ['date']);
+
+        (0, _each3.default)(this.data.fixtures, function (entry) {
+            var date = new Date(entry.date);
+
+            // add the team badges
+            update(self.data.fixtures, { 'homeTeamName': entry.homeTeamName }, { 'homeTeamStyle': _teamcodes2.default[entry.homeTeamName] });
+            update(self.data.fixtures, { 'awayTeamName': entry.awayTeamName }, { 'awayTeamStyle': _teamcodes2.default[entry.awayTeamName] });
+
+            //format the date
+            update(self.data.fixtures, { 'date': entry.date }, { 'date': (0, _dateformat2.default)(date, 'dd mmm.') });
         });
+
+        this.data.sidebar = this.__replaceText({
+            'old': this.data.sidebar,
+            'begin': '# \\[\\]\\(\\#pt-NOS\\) ' + this.data.standings.leagueCaption + ' - Fixtures',
+            'end': '\\n\\n\\n******',
+            'replacement': this.templateEngine.fixtures(this.data)
+        });
+
+        return this;
     }
 
     /**
      * Updates the sidebar
      *
-     * @param data
      * @returns {Promise}
      */
     updateSidebar() {
-        var _this6 = this;
-
-        var data = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var _this5 = this;
 
         var subreddit = this.subreddit;
 
-        return new Promise(function (resolve, reject) {
-            _this6.redditClient.getSubreddit(subreddit).editSettings({
-                'description': data.sidebar
-            }).then(function () {
-                data.completed = {};
-                data.completed.updateSidebar = true;
-                resolve(data);
-            }, function (error) {
-                reject(error);
-            });
-        });
-    }
-
-    /**
-     * Runs the whole thing together - tbh I'm not sure this should be here and not in the index file
-     */
-    run() {
-        var _this7 = this;
-
-        this.getStandings().then(function (data) {
-            return _this7.getCurrentSideBar(data);
-        }).then(function (data) {
-            return _this7.getStandings(data);
-        }).then(function (data) {
-            return _this7.getFixtures(data);
-        }).then(function (data) {
-            return _this7.doTable(data);
-        }).then(function (data) {
-            return _this7.doFixtures(data);
-        }).then(function (data) {
-            return _this7.updateSidebar(data);
+        return this.redditClient.getSubreddit(subreddit).editSettings({
+            'description': this.data.sidebar
+        }).then(function () {
+            _this5.data.completed = {};
+            _this5.data.completed.updateSidebar = true;
         });
     }
 }

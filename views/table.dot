@@ -1,8 +1,8 @@
-# [](#pt-NOS){{=it.standings.leagueCaption}} - Current Table
+# [](#pt-NOS) {{=it.standings.leagueCaption}} - Current Table
 
 | Pos.   | Team | Games   | Points    |
 |:------:|------|:-------:|:--------: |
-{{ for (var pos in it.standings.standing) { }}|    {{=it.standings.standing[pos].position}} | {{=it.standings.standing[pos].teamName }} |  {{=it.standings.standing[pos].playedGames }} |  {{=it.standings.standing[pos].points }} |
+{{ for (var pos in it.standings.standing) { }}|    {{=it.standings.standing[pos].position}} | [](#{{=it.standings.standing[pos].style}}) {{=it.standings.standing[pos].teamName }} |  {{=it.standings.standing[pos].playedGames }} |  {{=it.standings.standing[pos].points }} |
 {{ } }}
 
 ******
