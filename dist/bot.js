@@ -284,8 +284,14 @@ class bot {
             var date = new Date(entry.date);
 
             // add the team badges
-            update(self.data.fixtures, { 'homeTeamName': _teamcodes2.default[entry.homeTeamName].teamName }, { 'homeTeamStyle': _teamcodes2.default[entry.homeTeamName].style });
-            update(self.data.fixtures, { 'awayTeamName': _teamcodes2.default[entry.awayTeamName].teamName }, { 'awayTeamStyle': _teamcodes2.default[entry.awayTeamName].style });
+            update(self.data.fixtures, { 'homeTeamName': entry.homeTeamName }, {
+                'homeTeamName': _teamcodes2.default[entry.homeTeamName].teamName,
+                'homeTeamStyle': _teamcodes2.default[entry.homeTeamName].style
+            });
+            update(self.data.fixtures, { 'awayTeamName': entry.awayTeamName }, {
+                'awayTeamName': _teamcodes2.default[entry.awayTeamName].teamName,
+                'awayTeamStyle': _teamcodes2.default[entry.awayTeamName].style
+            });
 
             //format the date
             update(self.data.fixtures, { 'date': entry.date }, { 'date': (0, _dateformat2.default)(date, 'dd mmm.') });
@@ -320,6 +326,9 @@ class bot {
     }
 }
 exports.default = bot;
+//# sourceMappingURL=bot.js.map
+//# sourceMappingURL=bot.js.map
+//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
