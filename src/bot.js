@@ -211,10 +211,16 @@ export default class bot {
 
         // add the team badges
         each(this.data.standings.standing, function(entry) {
+            let teamInfo = TeamCodes[entry.teamName];
             update(
                 self.data.standings.standing,
                 { 'teamName': entry.teamName },
-                { 'style' : TeamCodes[entry.teamName] }
+                { 'style' : teamInfo.style }
+            );
+            update(
+                self.data.standings.standing,
+                { 'teamName': entry.teamName },
+                { 'teamName': teamInfo.teamName }
             );
         });
 
@@ -256,13 +262,13 @@ export default class bot {
             // add the team badges
             update(
                 self.data.fixtures,
-                { 'homeTeamName': entry.homeTeamName },
-                { 'homeTeamStyle' : TeamCodes[entry.homeTeamName] }
+                { 'homeTeamName': TeamCodes[entry.homeTeamName].teamName },
+                { 'homeTeamStyle' : TeamCodes[entry.homeTeamName].style }
             );
             update(
                 self.data.fixtures,
-                { 'awayTeamName': entry.awayTeamName },
-                { 'awayTeamStyle' : TeamCodes[entry.awayTeamName] }
+                { 'awayTeamName': TeamCodes[entry.awayTeamName].teamName },
+                { 'awayTeamStyle' : TeamCodes[entry.awayTeamName].style }
             );
 
             //format the date

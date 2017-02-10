@@ -33,9 +33,9 @@ plBot
         try {
             plBot.doTable().doFixtures().updateSidebar();
             logger.log('complete', plBot.data.completed);
-            console.log(plBot.data);
         } catch (error) {
             logger.log('error', error);
+            console.log();
         }
     } )
     .catch(

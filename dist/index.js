@@ -38,12 +38,15 @@ plBot.getData().then(function () {
     try {
         plBot.doTable().doFixtures().updateSidebar();
         logger.log('complete', plBot.data.completed);
-        console.log(plBot.data);
     } catch (error) {
         logger.log('error', error);
+        console.log();
     }
 }).catch(function (error) {
     logger.log('error', error);
 });
+//# sourceMappingURL=index.js.map
+//# sourceMappingURL=index.js.map
+//# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
