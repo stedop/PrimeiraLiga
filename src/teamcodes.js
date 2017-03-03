@@ -29,7 +29,7 @@ export default {
     },
     "Vitoria Guimaraes": {
         style: "pt-VSC",
-        teamName: "V. Guimarãe"
+        teamName: "V. Guimarães"
     },
     "Maritimo Funchal": {
         style: "pt-CSM",

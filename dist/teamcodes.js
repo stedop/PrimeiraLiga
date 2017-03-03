@@ -34,7 +34,7 @@ exports.default = {
     },
     "Vitoria Guimaraes": {
         style: "pt-VSC",
-        teamName: "V. Guimarãe"
+        teamName: "V. Guimarães"
     },
     "Maritimo Funchal": {
         style: "pt-CSM",
@@ -181,14 +181,5 @@ exports.default = {
         teamName: "U. Micaelense"
     }
 };
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
-//# sourceMappingURL=teamcodes.js.map
 //# sourceMappingURL=teamcodes.js.map
 //# sourceMappingURL=teamcodes.js.map

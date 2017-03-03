@@ -19,7 +19,13 @@ function _interopRequireDefault(obj) {
 (0, _nodeEnvFile2.default)(".env");
 
 var logger = new _winston2.default.Logger({
-    transports: [new _winston2.default.transports.Console()]
+    transports: [
+    //new (winston.transports.Console)(),
+    new _winston2.default.transports.File({
+        filename: "./logs/" + process.env.logFile,
+        handleExceptions: true,
+        humanReadableUnhandledException: true
+    })]
 });
 
 var botConfig = {
@@ -40,19 +46,9 @@ plBot.getData().then(function () {
         logger.log('complete', plBot.data.completed);
     } catch (error) {
         logger.log('error', error);
-        console.log();
     }
 }).catch(function (error) {
     logger.log('error', error);
 });
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
-//# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map
 //# sourceMappingURL=index.js.map

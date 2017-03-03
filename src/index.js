@@ -6,12 +6,12 @@ env( ".env" );
 
 const logger = new (winston.Logger)( {
     transports: [
-        new (winston.transports.Console)(),
-        /*new (winston.transports.File)( {
+        //new (winston.transports.Console)(),
+        new (winston.transports.File)( {
             filename: "./logs/" + process.env.logFile,
             handleExceptions: true,
             humanReadableUnhandledException: true
-        } )*/
+        } )
     ]
 } );
 
@@ -33,13 +33,15 @@ plBot
         try {
             plBot.doTable().doFixtures().updateSidebar();
             logger.log('complete', plBot.data.completed);
+
         } catch (error) {
             logger.log('error', error);
-            console.log();
+
         }
     } )
     .catch(
         (error) => {
             logger.log('error', error);
+
         }
     );
