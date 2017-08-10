@@ -243,10 +243,8 @@ class bot {
 
         // add the team badges
         (0, _each3.default)(this.data.standings.standing, function (entry) {
-            console.log(entry);
             var teamInfo = _teamcodes2.default[entry.teamName];
-            console.log(_teamcodes2.default);
-            console.log(teamInfo);
+
             update(self.data.standings.standing, { 'teamName': entry.teamName }, { 'style': teamInfo.style });
             update(self.data.standings.standing, { 'teamName': entry.teamName }, { 'teamName': teamInfo.teamName });
         });
@@ -302,7 +300,7 @@ class bot {
 
         this.data.sidebar = this.__replaceText({
             'old': this.data.sidebar,
-            'begin': '# \\[\\]\\(\\#pt-NOS\\) ' + this.data.standings.leagueCaption + ' - Fixtures',
+            'begin': '# \\[\\]\\(\\#pt-NOS\\) Primeira Liga - Fixtures',
             'end': '\\n\\n\\n******',
             'replacement': this.templateEngine.fixtures(this.data)
         });

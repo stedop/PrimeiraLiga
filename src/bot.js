@@ -211,10 +211,8 @@ export default class bot {
 
         // add the team badges
         each(this.data.standings.standing, function(entry) {
-            console.log(entry);
             let teamInfo = TeamCodes[entry.teamName];
-            console.log(TeamCodes);
-            console.log(teamInfo);
+
             update(
                 self.data.standings.standing,
                 { 'teamName': entry.teamName },
@@ -291,7 +289,7 @@ export default class bot {
 
         this.data.sidebar = this.__replaceText( {
             'old': this.data.sidebar,
-            'begin': '# \\[\\]\\(\\#pt-NOS\\) ' + this.data.standings.leagueCaption + ' - Fixtures',
+            'begin': '# \\[\\]\\(\\#pt-NOS\\) Primeira Liga - Fixtures',
             'end': '\\n\\n\\n******',
             'replacement': this.templateEngine.fixtures( this.data )
         } );
