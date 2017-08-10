@@ -75,7 +75,7 @@ export default {
         style: "pt-ACP",
         teamName: "Atlético CP"
     },
-    "Desp. Aves": {
+    "Desportivo Aves": {
         style: "pt-AVES",
         teamName: "Desp. Aves"
     },
@@ -131,7 +131,7 @@ export default {
         style: "pt-PEN",
         teamName: "Penafiel"
     },
-    "Portimonens": {
+    "Portimonense S.C.": {
         style: "pt-PSC",
         teamName: "Portimonens"
     },

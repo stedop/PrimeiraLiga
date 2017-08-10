@@ -80,7 +80,7 @@ exports.default = {
         style: "pt-ACP",
         teamName: "Atlético CP"
     },
-    "Desp. Aves": {
+    "Desportivo Aves": {
         style: "pt-AVES",
         teamName: "Desp. Aves"
     },
@@ -136,7 +136,7 @@ exports.default = {
         style: "pt-PEN",
         teamName: "Penafiel"
     },
-    "Portimonens": {
+    "Portimonense S.C.": {
         style: "pt-PSC",
         teamName: "Portimonens"
     },
@@ -181,5 +181,9 @@ exports.default = {
         teamName: "U. Micaelense"
     }
 };
+//# sourceMappingURL=teamcodes.js.map
+//# sourceMappingURL=teamcodes.js.map
+//# sourceMappingURL=teamcodes.js.map
+//# sourceMappingURL=teamcodes.js.map
 //# sourceMappingURL=teamcodes.js.map
 //# sourceMappingURL=teamcodes.js.map

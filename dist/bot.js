@@ -243,7 +243,10 @@ class bot {
 
         // add the team badges
         (0, _each3.default)(this.data.standings.standing, function (entry) {
+            console.log(entry);
             var teamInfo = _teamcodes2.default[entry.teamName];
+            console.log(_teamcodes2.default);
+            console.log(teamInfo);
             update(self.data.standings.standing, { 'teamName': entry.teamName }, { 'style': teamInfo.style });
             update(self.data.standings.standing, { 'teamName': entry.teamName }, { 'teamName': teamInfo.teamName });
         });
@@ -316,7 +319,7 @@ class bot {
         var _this5 = this;
 
         var subreddit = this.subreddit;
-
+        console.log(this.data);
         return this.redditClient.getSubreddit(subreddit).editSettings({
             'description': this.data.sidebar
         }).then(function () {
@@ -326,5 +329,6 @@ class bot {
     }
 }
 exports.default = bot;
+//# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map
 //# sourceMappingURL=bot.js.map

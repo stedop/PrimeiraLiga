@@ -211,7 +211,10 @@ export default class bot {
 
         // add the team badges
         each(this.data.standings.standing, function(entry) {
+            console.log(entry);
             let teamInfo = TeamCodes[entry.teamName];
+            console.log(TeamCodes);
+            console.log(teamInfo);
             update(
                 self.data.standings.standing,
                 { 'teamName': entry.teamName },
@@ -304,7 +307,7 @@ export default class bot {
      */
     updateSidebar() {
         let subreddit = this.subreddit;
-
+console.log(this.data);
         return this.redditClient.getSubreddit( subreddit ).editSettings(
             {
                 'description': this.data.sidebar
